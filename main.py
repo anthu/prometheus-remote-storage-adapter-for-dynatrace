@@ -22,9 +22,9 @@ def read():
     read_response = remote_pb2.ReadResponse()
     query_result = read_response.results.add()
 
-    if not res['error'] and res['totalCount'] > 0:
+    if 'error' not in res and res['totalCount'] > 0:
         for result in res['result']:
-            metric_name = result['metricId'].replace(':','__').replace('.','_')
+            metric_name = result['metricId'].replace('.','_')
 
             for data in result['data']:
                 timeseries = query_result.timeseries.add()
@@ -35,7 +35,7 @@ def read():
 
                 for dim, dim_val in data['dimensionMap'].items():
                     label = timeseries.labels.add()
-                    label.name = dim.replace(':','__').replace('.','_')
+                    label.name = dim.replace('.','_')
                     label.value = dim_val
                 
                 for i, timestamp in enumerate(data['timestamps']):
@@ -83,18 +83,21 @@ def write():
     return 'OK'
 
 def send_to_dt(content):
-    url = app.config["DT_TENANT"] + '/api/v2/metrics/ingest'
+    url = f"{app.config['DT_TENANT']}/api/v2/metrics/ingest"
     headers = {'Authorization': 'Api-Token ' + app.config["DT_API_TOKEN"], 'Content-Type': 'text/plain'}
 
-    x = requests.post(url, headers = headers, data = content)
-    print(x.content)
+    requests.post(url, headers = headers, data = content)
 
 def query_dt(metric, from_ts, to_ts):
-    url = app.config["DT_TENANT"] + '/api/v2/metrics/query?metricSelector=' + metric + "&from=" + str(from_ts) + "&to=" + str(to_ts)
-    headers = {'Authorization': 'Api-Token ' + app.config["DT_API_TOKEN"]}
+    url = (
+        f"{app.config['DT_TENANT']}/api/v2/metrics/query?" \
+        f"metricSelector={metric}&" \
+        f"from={from_ts}&" \
+        f"to={to_ts}"
+    )
+    headers = {'Authorization': f"Api-Token {app.config['DT_API_TOKEN']}"}
 
     x = requests.get(url, headers = headers)
-    print(x.json())
     return(x.json())
 
 if __name__ == "__main__":

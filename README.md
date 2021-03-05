@@ -51,7 +51,7 @@ Error executing query: invalid parameter "query": 1:18: parse error: unexpected 
 As a workaround use the alternative syntax:
 
 ```
-{"__name__": "builtin:synthetic.http.duration.geo"}
+{__name__="builtin:synthetic.http.duration.geo"}
 ```
 
 ### Prometheus does not list remote metric names
