@@ -2,9 +2,41 @@
 
 This is an experiment to use Dynatrace as remote storage for Prometheus. It implements both, the `remote_read` as well as the `remote_write` functionality for Prometheus.
 
+## Architecture Overview
+![](documentation/dt2prom_arch.png)
 ## Getting Started
 
-### Remote Storage Adapter Configuration
+### Using Docker
+A minimal example can be launched using docker compose:
+
+- Create a file named `.env` with your credentials:
+```
+DT_TENANT='tov08230.sprint.dynatracelabs.com'
+DT_API_TOKEN='dt0c01.NS2DS75F...'
+```
+- Adjust the `docker-compose.yml` file to your needs (optional)
+- run docker from the project root folder:
+```
+docker-compose up
+```
+
+Prometheus UI will be available on `http://localhost:9090`. There you can query for Dynatrace metrics using an adapted syntax where the `__name__` label represents the metric you're looking for (see limitations).
+```
+{__name__="builtin:synthetic.http.duration.geo"}
+```
+
+### Manual
+You can run it on your own:
+
+```
+### If you use venv
+# python3 -m pip install --user virtualenv
+# python3 -m venv env
+# source env/bin/activate
+
+python3 -m pip install -r requirements.txt
+```
+
 You'll need to configure your tenant url and API token (API v2 with the metrics read/write capabilities). This can be done as ENV variables or inside an [.env file](https://pypi.org/project/python-dotenv/).
 
 ```
@@ -14,10 +46,10 @@ export DT_API_TOKEN=<your_apiv2_token>
 
 Then you're good to go:
 ```
-python3 main.py
+python3 -m flask run
 ```
 
-### Prometheus Configuration
+## Prometheus Configuration
 Point your Prometheus instance to this application. See [documentation](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write) for further configuration options.
 
 Eg. if your Prometheus is running in a docker container use:

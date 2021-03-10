@@ -1,0 +1,34 @@
+# Example configuration for Prometheus
+# Used for Docker Compose
+scrape_configs:
+- job_name: 'prometheus'
+  scrape_interval: 30s
+
+  static_configs:
+    - targets:
+      - localhost:9090
+
+remote_read:
+- url: http://dt2prom:5000/read
+
+###########################################
+### Caution - ingestion might be billed ###
+###########################################
+# remote_write:
+# - url: http://dt2prom:5000/write
+#   write_relabel_configs:
+#     - source_labels: [__name__]
+#       regex: prometheus.*
+#       action: keep
+#   remote_timeout: 30s
+#   queue_config:
+#     capacity: 2500
+#     max_shards: 200
+#     min_shards: 1
+#     max_samples_per_send: 1000
+#     batch_send_deadline: 5s
+#     min_backoff: 30ms
+#     max_backoff: 100ms
+#   metadata_config:
+#     send: true
+#     send_interval: 5m
