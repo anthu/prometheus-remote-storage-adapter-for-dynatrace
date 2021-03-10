@@ -67,7 +67,9 @@ def write():
 
 def get_entity(dimension):
     url = f"https://{app.config['DT_TENANT']}/api/v2/entities/{dimension}"
-    headers = {'Authorization': f"Api-Token {app.config['DT_API_TOKEN']}"}
+    headers = {
+        'Authorization': f"Api-Token {app.config['DT_API_TOKEN']}"
+    }
 
     x = requests.get(url, headers = headers)
 
@@ -75,20 +77,25 @@ def get_entity(dimension):
 
 def ingest_metric(content):
     url = f"https://{app.config['DT_TENANT']}/api/v2/metrics/ingest"
-    headers = {'Authorization': f"Api-Token {app.config['DT_API_TOKEN']}", 'Content-Type': 'text/plain'}
+    headers = {
+        'Authorization': f"Api-Token {app.config['DT_API_TOKEN']}", 
+        'Content-Type': 'text/plain'
+    }
 
     requests.post(url, headers = headers, data = content)
 
 def query_metric(metric, from_ts, to_ts):
     url = (
-        f"https://{app.config['DT_TENANT']}/api/v2/metrics/query?" \
-        f"metricSelector={metric}&" \
-        f"from={from_ts}&" \
-        f"to={to_ts}"
+        f"https://{app.config['DT_TENANT']}/api/v2/metrics/query"
     )
+    params = {
+        "metricSelector": metric,
+        "from": from_ts,
+        "to": to_ts
+    }
     headers = {'Authorization': f"Api-Token {app.config['DT_API_TOKEN']}"}
-
-    x = requests.get(url, headers = headers)
+    
+    x = requests.get(url, params = params, headers = headers)
     return(x.json())
 
 def add_result(query_result, result):
