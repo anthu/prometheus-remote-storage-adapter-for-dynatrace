@@ -15,7 +15,6 @@ def read():
     msg = remote_pb2.ReadRequest()
     msg.ParseFromString(snappy.uncompress(request.data))
     
-    json = MessageToJson(msg)
     query = msg.queries[0]
     res = query_dt(query.matchers[0].value, query.start_timestamp_ms, query.end_timestamp_ms)
 
@@ -28,22 +27,15 @@ def read():
 
             for data in result['data']:
                 timeseries = query_result.timeseries.add()
-
-                label = timeseries.labels.add()
-                label.name = "__name__"
-                label.value = metric_name
+                timeseries.labels.add(name="__name__", value=metric_name)
 
                 for dim, dim_val in data['dimensionMap'].items():
-                    label = timeseries.labels.add()
-                    label.name = dim.replace('.','_')
-                    label.value = dim_val
+                    timeseries.labels.add(name=dim.replace('.','_'), value=dim_val)
                 
                 for i, timestamp in enumerate(data['timestamps']):
                     value = data['values'][i]
                     if value != None:
-                        sample = timeseries.samples.add()
-                        sample.value = value
-                        sample.timestamp = timestamp
+                        timeseries.samples.add(value = value, timestamp = timestamp)
 
     resp = Response(snappy.compress(read_response.SerializeToString()))
     resp.headers['Content-Type'] = 'application/x-protobuf'
@@ -55,36 +47,30 @@ def read():
 def write():
     msg = remote_pb2.WriteRequest()
     msg.ParseFromString(snappy.uncompress(request.data))
-    json = MessageToJson(msg)
 
-    to_send = ""
+    to_send = []
     for timeseries in msg.timeseries:
         
-        dt_name = dt_dimensions = ""
-
+        dt_dimensions = []
         for label in timeseries.labels:
             if label.name == '__name__':
-                dt_name = label.value
+                dt_dimensions.insert(0, label.value)
             else:
-                dt_dimensions += label.name + "=" + label.value + ","
+                dt_dimensions.append(f"{label.name}={label.value}")
 
-        dt = dt_name + "," + dt_dimensions.rstrip(',')
+        dt = ",".join(dt_dimensions)
 
         for sample in timeseries.samples:
             if str(sample.value) != "nan":
-                to_send += dt + " " + str(sample.value) + " " + str(sample.timestamp) + "\n"
+                to_send.append(f"{dt} {str(sample.value)} {str(sample.timestamp)}")
 
-    f = open("to_send.txt", "w")
-    f.write(to_send)
-    f.close()
-
-    send_to_dt(to_send)
+    send_to_dt("\n".join(to_send))
 
     return 'OK'
 
 def send_to_dt(content):
     url = f"{app.config['DT_TENANT']}/api/v2/metrics/ingest"
-    headers = {'Authorization': 'Api-Token ' + app.config["DT_API_TOKEN"], 'Content-Type': 'text/plain'}
+    headers = {'Authorization': f"Api-Token {app.config['DT_API_TOKEN']}", 'Content-Type': 'text/plain'}
 
     requests.post(url, headers = headers, data = content)
 

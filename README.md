@@ -3,6 +3,15 @@
 This is an experiment to use Dynatrace as remote storage for Prometheus. It implements both, the `remote_read` as well as the `remote_write` functionality for Prometheus.
 
 ## Getting Started
+### Installing dependencies
+```
+### If you use venv
+# python3 -m pip install --user virtualenv
+# python3 -m venv env
+# source env/bin/activate
+
+python3 -m pip install -r requirements.txt
+```
 
 ### Remote Storage Adapter Configuration
 You'll need to configure your tenant url and API token (API v2 with the metrics read/write capabilities). This can be done as ENV variables or inside an [.env file](https://pypi.org/project/python-dotenv/).
