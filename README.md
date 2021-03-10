@@ -2,6 +2,8 @@
 
 This is an experiment to use Dynatrace as remote storage for Prometheus. It implements both, the `remote_read` as well as the `remote_write` functionality for Prometheus.
 
+## Architecture Overview
+![](documentation/dt2prom_arch.png)
 ## Getting Started
 
 ### Using Docker
