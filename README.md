@@ -2,6 +2,12 @@
 
 This is an experiment to use Dynatrace as remote storage for Prometheus. It implements both, the `remote_read` as well as the `remote_write` functionality for Prometheus.
 
+Possible Usecases:
+- Query and combine data transparently through Prometheus
+- Forward Prometheus-collected data to Dynatrace
+- Design Grafana dashboards with Dynatrace data using PromQL
+- Use the `remote_write` and `remote_read` implementation in Python as inspiration for other projects
+
 ## Architecture Overview
 ![](documentation/dt2prom_arch.png)
 ## Getting Started
