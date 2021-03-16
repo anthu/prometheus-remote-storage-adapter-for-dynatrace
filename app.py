@@ -1,11 +1,9 @@
-import requests
-import remote_pb2 
-import types_pb2
-import snappy
 import re
-
+import requests
+import snappy
 from flask import Flask, Response, request
-from google.protobuf.json_format import MessageToJson
+import remote_pb2
+
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -16,14 +14,20 @@ dim_map = {}
 def read():
     msg = remote_pb2.ReadRequest()
     msg.ParseFromString(snappy.uncompress(request.data))
-    app.logger.debug(msg)
 
     resp = Response()
     resp.headers['Content-Type'] = 'application/x-protobuf'
     resp.headers['Content-Encoding'] = 'snappy'
     
     query = msg.queries[0]
-    res = query_metric(query.matchers[0].value, query.start_timestamp_ms, query.end_timestamp_ms)
+    metric_name = ''
+    matchers = []
+    for matcher in query.matchers:
+        if matcher.name == '__name__':
+            metric = matcher.value
+        else:
+            matchers.append(f"{matcher.name}(\"{matcher.value}\")")
+    res = query_metric(metric_name, query.start_timestamp_ms, query.end_timestamp_ms, matchers)
 
     read_response = remote_pb2.ReadResponse()
     query_result = read_response.results.add()
@@ -84,7 +88,7 @@ def ingest_metric(content):
 
     requests.post(url, headers = headers, data = content)
 
-def query_metric(metric, from_ts, to_ts):
+def query_metric(metric, from_ts, to_ts, matchers=[]):
     url = (
         f"https://{app.config['DT_TENANT']}/api/v2/metrics/query"
     )
@@ -93,6 +97,10 @@ def query_metric(metric, from_ts, to_ts):
         "from": from_ts,
         "to": to_ts
     }
+
+    if len(matchers) > 0:
+        params["entitySelector"] = ",".join(matchers)
+
     headers = {'Authorization': f"Api-Token {app.config['DT_API_TOKEN']}"}
     
     x = requests.get(url, params = params, headers = headers)
