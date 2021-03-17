@@ -21,7 +21,7 @@ class CachedEntityClient:
             self.dimension_name_bidict.forceput(entity_id, entity_name)
             return entity_name
         else:
-            return self.dimension_name_bidict.get(entity_id)
+            return self.dimension_name_bidict.get(entity_id, entity_id)
 
     def get_entity_id(self, entity_name):
         entity_id = self.dimension_name_bidict.inverse.get(entity_name, entity_name)
