@@ -4,7 +4,7 @@ import requests
 import snappy
 from flask import Flask, Response, request
 from flask.logging import create_logger
-import remote_pb2
+from proto import remote_pb2
 
 
 app = Flask(__name__)
