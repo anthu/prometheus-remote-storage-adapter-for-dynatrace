@@ -26,7 +26,7 @@ def read():
         if matcher.name == '__name__':
             metric = matcher.value
         else:
-            matchers.append(f"{matcher.name}(\"{matcher.value}\")")
+            matchers.append(f"eq({matcher.name},{matcher.value})")
     res = query_metric(metric_name, query.start_timestamp_ms, query.end_timestamp_ms, matchers)
 
     read_response = remote_pb2.ReadResponse()
@@ -99,7 +99,7 @@ def query_metric(metric, from_ts, to_ts, matchers=[]):
     }
 
     if len(matchers) > 0:
-        params["entitySelector"] = ",".join(matchers)
+        params["metricSelector"] += f":filter(or({','.join(matchers)}))"
 
     headers = {'Authorization': f"Api-Token {app.config['DT_API_TOKEN']}"}
     
