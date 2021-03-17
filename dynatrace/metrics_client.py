@@ -18,7 +18,8 @@ class CachedMetricsClient:
         self.prefetch_metrics()
 
     def get_dt_metric_from_prom(self, prom_metric_name):
-        return self.metrics_dict.get(prom_metric_name.lower())
+        metric_candidate = re.sub(r'[^a-z0-9:]', "_", prom_metric_name.lower())
+        return self.metrics_dict.get(metric_candidate)
 
     def get_label_from_dimension(self, dimension_name):
         return self.dimension_label_bidict.get(dimension_name.lower())
