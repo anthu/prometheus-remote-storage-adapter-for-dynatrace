@@ -86,11 +86,10 @@ If you try to query Prometheus for an invalid metric name like `builtin:syntheti
 ```
 Error executing query: invalid parameter "query": 1:18: parse error: unexpected character: '.'
 ```
-As a workaround use the alternative syntax:
+As a workaround use one of the alternative syntaxes:
 
-```
-{__name__="builtin:synthetic.http.duration.geo"}
-```
+- Embed the metricname as the __name__ label: `{__name__="builtin:synthetic.http.duration.geo"}`
+- replace all unsupported chars with underscores (`_`) - The adapter will look up the actual metric name: `builtin:synthetic_http_duration_geo`
 
 ### Prometheus does not list remote metric names
 As of now you can not get autocomplete of Dynatrace metrics in the UI. This is a known limitation for remote storage and is being addressed in [prometheus/prometheus#7076](https://github.com/prometheus/prometheus/pull/7076).
